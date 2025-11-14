@@ -541,5 +541,74 @@ void insert_sq(SqList *Va, ElemType x) {
   4. 表长加1；
 - 复杂度：时间复杂度O(n)（最坏情况需移动n个元素），空间复杂度O(1)（原地操作）。
 
+---
+## 题目：从邻接表转换成邻接矩阵的算法
 
-需要我帮你补充这两道题的“测试用例示例”吗？
+---
+
+#### 思路
+
+要把一个图的 **邻接表（AdjList）** 转换成 ​**邻接矩阵（AdjMatrix）**​，需要做以下步骤：
+
+* 邻接表用链表的方式存储顶点的邻居
+* 邻接矩阵是 n×n 数组，matrix[i][j] = 1 表示存在边
+
+---
+
+#### 完整的 C 语言代码（含详细注释）
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAXV 100   // 最大顶点数
+#define INF 0      // 无边时的值（可以设为 0 或 INF）
+
+/*-----------------------------*
+ *   邻接表的数据结构定义
+ *-----------------------------*/
+
+// 边结点结构
+typedef struct ArcNode {
+    int adjvex;              // 该边指向的顶点下标
+    struct ArcNode *next;    // 下一条边
+} ArcNode;
+
+// 顶点表头结点
+typedef struct VNode {
+    ArcNode *first;          // 指向第一条边
+} VNode;
+
+// 图的邻接表结构
+typedef struct {
+    VNode vertices[MAXV];    // 顶点数组
+    int vexnum;              // 顶点数
+    int arcnum;              // 边数
+} AdjListGraph;
+
+/*-----------------------------*
+ *   邻接表 → 邻接矩阵转换函数
+ *-----------------------------*/
+
+void AdjListToMatrix(AdjListGraph G, int matrix[MAXV][MAXV]) {
+    // 1. 初始化邻接矩阵为 0
+    for (int i = 0; i < G.vexnum; i++) {
+        for (int j = 0; j < G.vexnum; j++) {
+            matrix[i][j] = 0;   // 或设为 INF
+        }
+    }
+
+    // 2. 遍历每个顶点 i 的边链表
+    for (int i = 0; i < G.vexnum; i++) {
+        ArcNode *p = G.vertices[i].first;   // 指向第一个边
+        while (p != NULL) {
+            int j = p->adjvex;              // 得到 i → j
+            matrix[i][j] = 1;               // 置为 1（或赋权值）
+            p = p->next;                    // 继续遍历下一条边
+        }
+    }
+}
+
+```
+
+
