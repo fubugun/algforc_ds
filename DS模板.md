@@ -181,19 +181,25 @@ void preOrderIterative(BiTree T) {
 - **非递归中序遍历**
 ```c
 void inOrderIterative(BiTree T) {
-    if (T == NULL) return;
-    BiTNode* stack[100];
-    int top = -1;
-    BiTree p = T;
+    if (T == NULL) return;  // 树空直接返回
+    BiNode* stack[100];     // 用数组当栈（最多存100个节点）
+    int top = -1;           // 栈顶指针，-1代表栈空
+    BiTree p = T;           // p是遍历指针，从根节点开始
+
+    // 循环条件：p不为空（还有左子树要压栈） OR 栈不为空（还有节点没处理）
     while (p != NULL || top != -1) {
-        // 左子树全部入栈
+        // 第一步：把当前节点的所有左子树全部压入栈
         while (p != NULL) {
-            stack[++top] = p;
-            p = p->lchild;
+            stack[++top] = p;  // 先把top+1，再把p压入栈
+            p = p->lchild;     // p指向左子树，继续压左
         }
-        p = stack[top--];  // 弹出节点
-        printf("%d ", p->data);  // 访问节点
-        p = p->rchild;     // 转向右子树
+
+        // 第二步：弹出栈顶节点（此时p已经是NULL，说明左子树压完了）
+        p = stack[top--];      // 取出栈顶节点，top-1（栈顶下移）
+        printf("%d ", p->data);// 访问这个节点（这是“左→根”里的“根”）
+
+        // 第三步：转向右子树，继续处理右子树的“左→根→右”
+        p = p->rchild;
     }
 }
 ```
