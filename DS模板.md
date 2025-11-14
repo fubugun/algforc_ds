@@ -160,18 +160,22 @@ void postOrder(BiTree T) {
 - **非递归前序遍历**
 ```c
 void preOrderIterative(BiTree T) {
-    if (T == NULL) return;
-    stack<BiTNode*> st;
-    st.push(T);  // 根节点入栈
-    while (!st.empty()) {
-        BiTNode* node = st.top();
-        st.pop();
-        printf("%d ", node->data);  // 访问节点
-        // 右子树先入栈（栈是“先进后出”，保证左子树先处理）
-        if (node->rchild != NULL) st.push(node->rchild);
-        if (node->lchild != NULL) st.push(node->lchild);
+    if (T == NULL) return;  // 树空的话直接返回
+    stack<BiNode*> st;      // 定义一个“存二叉树节点指针”的栈
+    st.push(T);             // 第一步：把根节点(1)压入栈
+
+    while (!st.empty()) {   // 栈不空就一直循环
+        BiNode* node = st.top();  // 取出栈顶节点（此时是根节点1）
+        st.pop();                 // 把栈顶节点弹出栈
+
+        printf("%d ", node->data);  // 访问节点（输出1）
+
+        // 关键：栈是“先进后出”，所以要先压右子树、再压左子树
+        if (node->rchild != NULL) st.push(node->rchild);  // 压右子树(3)
+        if (node->lchild != NULL) st.push(node->lchild);  // 压左子树(2)
     }
 }
+
 ```
 
 - **非递归中序遍历**
