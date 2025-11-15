@@ -599,7 +599,60 @@ int main() {
     return 0;
 }
 ```
+＃＃C语言递归实现汉诺塔问题
+ 
+汉诺塔的核心递归思想：将n个盘子从A柱移到C柱，需先把上方n-1个盘子移到B柱（借助C），再把第n个盘子移到C柱，最后把n-1个盘子从B柱移到C柱（借助A）。
+ 
+完整代码
+ 
+c  
+#include <stdio.h>
 
+// 递归函数：将n个盘子从from柱移到to柱，借助aux柱
+void hanoi(int n, char from, char aux, char to) {
+    if (n == 1) { // 递归终止条件：1个盘子直接移
+        printf("将盘子1从%c柱移到%c柱\n", from, to);
+        return;
+    }
+    // 1. 把n-1个盘子从from移到aux，借助to
+    hanoi(n - 1, from, to, aux);
+    // 2. 把第n个盘子从from移到to
+    printf("将盘子%d从%c柱移到%c柱\n", n, from, to);
+    // 3. 把n-1个盘子从aux移到to，借助from
+    hanoi(n - 1, aux, from, to);
+}
+
+int main() {
+    int num;
+    printf("请输入汉诺塔的盘子个数：");
+    scanf("%d", &num);
+    
+    printf("汉诺塔移动步骤（A为起始柱，C为目标柱，B为辅助柱）：\n");
+    hanoi(num, 'A', 'B', 'C'); // 调用递归函数
+    return 0;
+}
+ 
+ 
+关键说明
+ 
+1. 参数含义： n 为盘子总数， from 是起始柱， aux 是辅助柱， to 是目标柱。
+2. 递归终止：n=1时直接移动，避免无限递归。
+3. 移动逻辑：3步操作覆盖所有情况，移动次数固定为 2ⁿ - 1 （n为盘子数）。
+ 
+示例运行（n=3）
+ 
+plaintext  
+请输入汉诺塔的盘子个数：3
+汉诺塔移动步骤（A为起始柱，C为目标柱，B为辅助柱）：
+将盘子1从A柱移到C柱
+将盘子2从A柱移到B柱
+将盘子1从C柱移到B柱
+将盘子3从A柱移到C柱
+将盘子1从B柱移到A柱
+将盘子2从B柱移到C柱
+将盘子1从A柱移到C柱
+ 
+ 、、、
 ## 三、数据结构类（链表）
 ### 说明
 - typedef位置在主函数之前；
