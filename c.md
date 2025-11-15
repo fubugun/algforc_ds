@@ -600,8 +600,146 @@ int main() {
 }
 ```
 
- 
- 、、、
+ 汉诺塔问题（解释 + 思路 + C 代码，注释清楚）
+
+问题描述
+
+汉诺塔（Tower of Hanoi）是一个经典递归问题：有三根柱子（通常记为 A、B、C），在柱子 A 上按从小到大叠着 n 个盘子。目标是把所有盘子从柱子 A 移到柱子 C，且在任何时刻都只能移动一个盘子，并且不能把大盘子放在小盘子上。
+
+思路（递归解法，直观且标准）
+
+记 H(n, from, aux, to) 表示把 n 个盘子从 from 柱子借助 aux 柱子 移到 to 柱子。
+递归思路：
+
+1. 若 n == 1：直接把盘子从 from 移到 to（基本情形）。
+
+
+2. 若 n > 1：
+
+先把 n-1 个盘子从 from 借助 to 移到 aux（这一步本身递归）。
+
+然后把第 n（最大的）盘子从 from 移到 to（一次移动）。
+
+最后把之前放在 aux 上的 n-1 个盘子借助 from 移到 to（再次递归）。
+
+
+
+
+总移动次数为 。时间复杂度和移动次数都是指数级 。
+
+注意点
+
+当 n 很大时（例如 n > 64），移动次数会很大且超出 64-bit 范围；在实际运行中 n 一般不超过 20~25（否则输出会非常长）。
+
+递归深度为 n，若 n 很大可能会造成栈溢出。
+
+
+
+---
+
+C 代码（带详细注释）
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+/*
+ 汉诺塔递归实现
+ 参数说明：
+   n    : 要移动的盘子数量（正整数）
+   from : 起始柱子的名字（字符，如 'A'）
+   aux  : 辅助柱子的名字（字符，如 'B'）
+   to   : 目标柱子的名字（字符，如 'C'）
+ 函数功能：
+   打印把 n 个盘子从 from 借助 aux 移到 to 的每一步移动。
+   并将移动次数累加到全局计数器 moves 中。
+*/
+unsigned long long moves = 0; // 全局移动计数器，使用 unsigned long long 存储较大的计数
+
+void hanoi(int n, char from, char aux, char to) {
+    if (n <= 0) {
+        // 非法或无盘子时，不做任何操作
+        return;
+    }
+    if (n == 1) {
+        // 基本情形：只有一个盘子，直接从 from 移到 to
+        printf("Move disk 1 from %c to %c\n", from, to);
+        moves += 1ULL;
+        return;
+    }
+    // 把前 n-1 个盘子从 from 移到 aux（借助 to）
+    hanoi(n - 1, from, to, aux);
+
+    // 把第 n 个（最大的）盘子从 from 移到 to
+    printf("Move disk %d from %c to %c\n", n, from, to);
+    moves += 1ULL;
+
+    // 把 n-1 个盘子从 aux 移到 to（借助 from）
+    hanoi(n - 1, aux, from, to);
+}
+
+int main(void) {
+    int n;
+    printf("Enter number of disks (positive integer): ");
+    if (scanf("%d", &n) != 1) {
+        fprintf(stderr, "Invalid input. Please enter an integer.\n");
+        return EXIT_FAILURE;
+    }
+    if (n <= 0) {
+        fprintf(stderr, "Number of disks must be positive.\n");
+        return EXIT_FAILURE;
+    }
+
+    // 提示：当 n 较大时（例如 > 20），输出将非常长
+    if (n > 20) {
+        printf("Warning: n = %d may produce a very large number of moves (%llu).\n",
+               n, (unsigned long long)((1ULL << (n > 63 ? 63 : n)) - 1ULL));
+        // 上面位移用于提示，不用于精确计算超大 n 的 2^n - 1（若 n>63 则位移溢出）
+    }
+
+    printf("\n--- Steps to move %d disks from A to C ---\n", n);
+    moves = 0ULL;
+    hanoi(n, 'A', 'B', 'C');
+    printf("\nTotal moves: %llu\n", moves);
+
+    // 验证移动次数是否等于 2^n - 1（尽量避免溢出）
+    if (n < 64) {
+        unsigned long long expected = (1ULL << n) - 1ULL;
+        printf("Expected moves (2^n - 1): %llu\n", expected);
+    } else {
+        printf("Expected moves (2^n - 1) exceeds 64-bit range for n = %d.\n", n);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+使用示例
+
+输入 3 时，输出：
+
+Move disk 1 from A to C
+Move disk 2 from A to B
+Move disk 1 from C to B
+Move disk 3 from A to C
+Move disk 1 from B to A
+Move disk 2 from B to C
+Move disk 1 from A to C
+
+Total moves: 7
+Expected moves (2^n - 1): 7
+
+
+---
+
+如果你还想：
+
+我可以把输出格式改成更紧凑或带步号（如 "Step 1: ..."）。
+
+或者给出非递归（迭代）解法或图形/动画演示思路（比如用数组模拟三根柱子并显示状态），告诉我你选择哪个，我直接给代码。
+
+
+
+ 
 ## 三、数据结构类（链表）
 ### 说明
 - typedef位置在主函数之前；
