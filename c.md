@@ -600,144 +600,83 @@ int main() {
 }
 ```
 
- 汉诺塔问题（解释 + 思路 + C 代码，注释清楚）
+## 汉诺塔问题（递归实现）
+核心结论：汉诺塔问题的最优解是**递归分解**，通过“n-1个盘子过渡+第n个盘子直达”的思路，实现n个盘子的移动，时间复杂度O(2ⁿ-1)，空间复杂度O(n)（递归栈开销）。
 
-问题描述
-
-汉诺塔（Tower of Hanoi）是一个经典递归问题：有三根柱子（通常记为 A、B、C），在柱子 A 上按从小到大叠着 n 个盘子。目标是把所有盘子从柱子 A 移到柱子 C，且在任何时刻都只能移动一个盘子，并且不能把大盘子放在小盘子上。
-
-思路（递归解法，直观且标准）
-
-记 H(n, from, aux, to) 表示把 n 个盘子从 from 柱子借助 aux 柱子 移到 to 柱子。
-递归思路：
-
-1. 若 n == 1：直接把盘子从 from 移到 to（基本情形）。
-
-
-2. 若 n > 1：
-
-先把 n-1 个盘子从 from 借助 to 移到 aux（这一步本身递归）。
-
-然后把第 n（最大的）盘子从 from 移到 to（一次移动）。
-
-最后把之前放在 aux 上的 n-1 个盘子借助 from 移到 to（再次递归）。
-
-
-
-
-总移动次数为 。时间复杂度和移动次数都是指数级 。
-
-注意点
-
-当 n 很大时（例如 n > 64），移动次数会很大且超出 64-bit 范围；在实际运行中 n 一般不超过 20~25（否则输出会非常长）。
-
-递归深度为 n，若 n 很大可能会造成栈溢出。
-
-
+### 一、问题解释
+- 有三根柱子（记为A、B、C），A柱上叠放n个大小不同的托盘（上小下大）。
+- 目标：将A柱上所有托盘全部移到C柱，B柱作为过渡。
+- 规则：1. 每次只能移动1个托盘；2. 任何时刻都不能把大托盘放在小托盘上。
 
 ---
 
-C 代码（带详细注释）
+### 二、解题思路（递归核心）
+递归的核心是“大事化小”，将n个盘子的移动分解为3个步骤，利用B柱作为中间过渡：
+1. **第一步**：将A柱上的**n-1个托盘**，借助C柱过渡，移动到B柱（此时B柱暂存n-1个托盘，A柱只剩最大的第n个托盘）。
+2. **第二步**：将A柱上剩下的**第n个托盘**（最大的那个），直接移动到C柱（目标柱）。
+3. **第三步**：将B柱上暂存的**n-1个托盘**，借助A柱过渡，移动到C柱（此时C柱已放好最大托盘，n-1个托盘叠在上面，满足规则）。
 
+- 递归终止条件：当n=1时，直接将A柱的1个托盘移到C柱，无需过渡。
+
+---
+
+### 三、C代码实现（注释清晰）
+```c
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
 
-/*
- 汉诺塔递归实现
- 参数说明：
-   n    : 要移动的盘子数量（正整数）
-   from : 起始柱子的名字（字符，如 'A'）
-   aux  : 辅助柱子的名字（字符，如 'B'）
-   to   : 目标柱子的名字（字符，如 'C'）
- 函数功能：
-   打印把 n 个盘子从 from 借助 aux 移到 to 的每一步移动。
-   并将移动次数累加到全局计数器 moves 中。
-*/
-unsigned long long moves = 0; // 全局移动计数器，使用 unsigned long long 存储较大的计数
-
-void hanoi(int n, char from, char aux, char to) {
-    if (n <= 0) {
-        // 非法或无盘子时，不做任何操作
-        return;
-    }
+/**
+ * @brief 汉诺塔递归函数
+ * @param n：需要移动的托盘个数
+ * @param a：起始柱（托盘初始所在的柱子）
+ * @param b：过渡柱（辅助移动的中间柱子）
+ * @param c：目标柱（托盘最终要到达的柱子）
+ */
+void hanoi(int n, char a, char b, char c) {
+    // 递归终止条件：n=1时，直接将a柱的托盘移到c柱
     if (n == 1) {
-        // 基本情形：只有一个盘子，直接从 from 移到 to
-        printf("Move disk 1 from %c to %c\n", from, to);
-        moves += 1ULL;
+        printf("移动托盘 %d：%c -> %c\n", n, a, c);
         return;
     }
-    // 把前 n-1 个盘子从 from 移到 aux（借助 to）
-    hanoi(n - 1, from, to, aux);
 
-    // 把第 n 个（最大的）盘子从 from 移到 to
-    printf("Move disk %d from %c to %c\n", n, from, to);
-    moves += 1ULL;
+    // 第一步：将n-1个托盘从a柱，借助c柱，移到b柱（b柱暂存）
+    hanoi(n - 1, a, c, b);
 
-    // 把 n-1 个盘子从 aux 移到 to（借助 from）
-    hanoi(n - 1, aux, from, to);
+    // 第二步：将第n个托盘（最大的）从a柱直接移到c柱
+    printf("移动托盘 %d：%c -> %c\n", n, a, c);
+
+    // 第三步：将n-1个托盘从b柱，借助a柱，移到c柱（完成最终堆叠）
+    hanoi(n - 1, b, a, c);
 }
 
-int main(void) {
+int main() {
     int n;
-    printf("Enter number of disks (positive integer): ");
-    if (scanf("%d", &n) != 1) {
-        fprintf(stderr, "Invalid input. Please enter an integer.\n");
-        return EXIT_FAILURE;
-    }
-    if (n <= 0) {
-        fprintf(stderr, "Number of disks must be positive.\n");
-        return EXIT_FAILURE;
-    }
+    printf("请输入汉诺塔的托盘个数：");
+    scanf("%d", &n);
 
-    // 提示：当 n 较大时（例如 > 20），输出将非常长
-    if (n > 20) {
-        printf("Warning: n = %d may produce a very large number of moves (%llu).\n",
-               n, (unsigned long long)((1ULL << (n > 63 ? 63 : n)) - 1ULL));
-        // 上面位移用于提示，不用于精确计算超大 n 的 2^n - 1（若 n>63 则位移溢出）
-    }
+    printf("\n汉诺塔移动步骤（共 %d 步）：\n", (1 << n) - 1); // 总步数公式：2ⁿ-1
+    hanoi(n, 'A', 'B', 'C'); // 调用递归函数，A=起始柱，B=过渡柱，C=目标柱
 
-    printf("\n--- Steps to move %d disks from A to C ---\n", n);
-    moves = 0ULL;
-    hanoi(n, 'A', 'B', 'C');
-    printf("\nTotal moves: %llu\n", moves);
-
-    // 验证移动次数是否等于 2^n - 1（尽量避免溢出）
-    if (n < 64) {
-        unsigned long long expected = (1ULL << n) - 1ULL;
-        printf("Expected moves (2^n - 1): %llu\n", expected);
-    } else {
-        printf("Expected moves (2^n - 1) exceeds 64-bit range for n = %d.\n", n);
-    }
-
-    return EXIT_SUCCESS;
+    return 0;
 }
-
-使用示例
-
-输入 3 时，输出：
-
-Move disk 1 from A to C
-Move disk 2 from A to B
-Move disk 1 from C to B
-Move disk 3 from A to C
-Move disk 1 from B to A
-Move disk 2 from B to C
-Move disk 1 from A to C
-
-Total moves: 7
-Expected moves (2^n - 1): 7
-
+```
 
 ---
 
-如果你还想：
+### 四、运行示例（n=3时）
+```
+请输入汉诺塔的托盘个数：3
 
-我可以把输出格式改成更紧凑或带步号（如 "Step 1: ..."）。
+汉诺塔移动步骤（共 7 步）：
+移动托盘 1：A -> C
+移动托盘 2：A -> B
+移动托盘 1：C -> B
+移动托盘 3：A -> C
+移动托盘 1：B -> A
+移动托盘 2：B -> C
+移动托盘 1：A -> C
+```
 
-或者给出非递归（迭代）解法或图形/动画演示思路（比如用数组模拟三根柱子并显示状态），告诉我你选择哪个，我直接给代码。
-
-
+---
 
  
 ## 三、数据结构类（链表）
@@ -1106,6 +1045,101 @@ int main() {
 }
 ```
 
+## 写出一个函数  使用冒泡排序  将存储整型数据的链表进行升序排序
+以下是用 **C语言** 实现的、基于冒泡排序的链表升序排序函数，逻辑贴合冒泡排序“相邻比较、逐轮冒泡”核心，适配链表存储特性：
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+// 链表节点定义
+typedef struct ListNode {
+    int val;                  // 节点值
+    struct ListNode *next;    // 指向下一节点的指针
+} ListNode;
+
+// 冒泡排序链表（升序）
+ListNode* bubbleSortList(ListNode* head) {
+    // 边界条件：空链表或只有一个节点，直接返回
+    if (head == NULL || head->next == NULL) {
+        return head;
+    }
+
+    ListNode *p, *q;          // 用于相邻节点比较的指针
+    ListNode *tail = NULL;    // 标记已排序区间的尾节点（初始为空，排序后逐步前移）
+    int swapped;              // 标记本轮是否发生交换（优化：无交换则排序完成）
+
+    do {
+        swapped = 0;          // 初始化为未交换
+        p = head;             // 每次从表头开始比较
+
+        // 遍历未排序区间（到tail前一个节点结束，避免越界）
+        while (p->next != tail) {
+            q = p->next;      // q是p的下一个节点
+            if (p->val > q->val) {  // 前节点值大于后节点，交换数据（链表无需移动节点，仅换值更高效）
+                int temp = p->val;
+                p->val = q->val;
+                q->val = temp;
+                swapped = 1;  // 标记发生交换
+            }
+            p = p->next;      // 移动到下一组相邻节点
+        }
+        tail = p;             // 本轮排序后，未排序区间的最后一个节点成为已排序区间的尾节点
+    } while (swapped);        // 直到某轮无交换，排序完成
+
+    return head;
+}
+
+// 辅助函数：创建新节点
+ListNode* createNode(int val) {
+    ListNode *node = (ListNode*)malloc(sizeof(ListNode));
+    node->val = val;
+    node->next = NULL;
+    return node;
+}
+
+// 辅助函数：打印链表
+void printList(ListNode* head) {
+    ListNode *p = head;
+    while (p != NULL) {
+        printf("%d ", p->val);
+        p = p->next;
+    }
+    printf("\n");
+}
+
+// 测试示例
+int main() {
+    // 构建链表：4 -> 2 -> 1 -> 3
+    ListNode *head = createNode(4);
+    head->next = createNode(2);
+    head->next->next = createNode(1);
+    head->next->next->next = createNode(3);
+
+    printf("排序前：");
+    printList(head);
+
+    head = bubbleSortList(head);
+
+    printf("排序后：");
+    printList(head);
+
+    return 0;
+}
+```
+
+### 核心逻辑说明：
+1. **链表适配**：冒泡排序的“相邻比较”天然适配链表（通过`p`和`p->next`访问相邻节点），无需像数组那样移动元素，仅交换节点存储的数值即可。
+2. **优化策略**：用`tail`标记已排序区间的尾部，每次遍历仅需到`tail`前结束（已排序节点无需再比较）；用`swapped`标记是否交换，无交换则直接终止（说明已有序）。
+3. **边界处理**：单独判断空链表或单节点链表，避免无效操作。
+
+### 运行结果：
+```
+排序前：4 2 1 3 
+排序后：1 2 3 4 
+```
+
+
 ## 四、数学与进制转换类
 ### 说明
 - 判断是否是素数：到sqrt(m)；
@@ -1156,6 +1190,72 @@ int main() {
     return 0;
 }
 ```
+## 使用递归的方法把二进制转换成十进制
+### 关键说明：
+1. 递归函数`decimalToBinary`通过**先深入后输出**的方式，天然实现了二进制的“逆序输出”（因为先处理高位，回溯时才输出低位）。
+2. 对`n=0`的特殊处理是必要的，否则递归终止条件会导致0无法输出。
+   
+### C代码
+```c
+#include <stdio.h>
+
+int main() {
+    int n = 1000;
+    int count = 0;
+    int i = 5;  // 从5的1次幂开始
+
+    // 累加所有5的幂次对应的因数5个数：5^1、5^2、5^3...
+    while (i <= n) {
+        count += n / i;  // 每次累加当前幂次的商（整数部分）
+        i *= 5;  // 计算下一个5的幂次（5→25→125→625...）
+    }
+
+    printf("1000!末尾0的个数为：%d\n", count);
+    return 0;
+}
+```
+
+### 输出结果
+```
+1000!末尾0的个数为：249
+```
+
+以下是按照递归思路实现的十进制转二进制程序（延续之前的代码格式，包含详细注释）：
+
+```c
+#include <stdio.h>
+
+// 递归函数：将非负十进制数n转为二进制并输出
+// 核心逻辑：先递归处理高位（n/2），回溯时输出低位（n%2），实现"除2取余，逆序输出"
+void decimalToBinary(int n) {
+    // 递归终止条件：当n为0时，不再递归（避免输出多余前导0）
+    if (n == 0) {
+        return;
+    }
+    // 递归处理n除以2的商（获取更高位的二进制数）
+    decimalToBinary(n / 2);
+    // 回溯时输出当前n除以2的余数（0或1，即当前位的二进制数）
+    printf("%d", n % 2);
+}
+
+int main() {
+    int num;
+    printf("请输入一个非负十进制整数：");
+    scanf("%d", &num);
+
+    // 特殊处理：输入为0时，直接输出0（否则递归不会执行输出语句）
+    if (num == 0) {
+        printf("对应的二进制数：0\n");
+    } else {
+        printf("对应的二进制数：");
+        decimalToBinary(num);  // 调用递归函数
+        printf("\n");
+    }
+
+    return 0;
+}
+```
+
 
 ### 题目2：进制转换
 #### 子题目2.1：十六进制转十进制
@@ -1567,27 +1667,12 @@ int main() {
 总个数 = 200 + 40 + 8 + 1 = 249。
 
 
-### C代码
-```c
-#include <stdio.h>
 
-int main() {
-    int n = 1000;
-    int count = 0;
-    int i = 5;  // 从5的1次幂开始
 
-    // 累加所有5的幂次对应的因数5个数：5^1、5^2、5^3...
-    while (i <= n) {
-        count += n / i;  // 每次累加当前幂次的商（整数部分）
-        i *= 5;  // 计算下一个5的幂次（5→25→125→625...）
-    }
 
-    printf("1000!末尾0的个数为：%d\n", count);
-    return 0;
-}
+
 ```
 
-### 输出结果
-```
-1000!末尾0的个数为：249
-```
+
+
+
