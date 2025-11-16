@@ -610,5 +610,60 @@ void AdjListToMatrix(AdjListGraph G, int matrix[MAXV][MAXV]) {
 }
 
 ```
+## 将顺序表存储的完全二叉树转换为二叉链表结构
+顺序表T定义如下
+```c
+struct tree{
+    int no;
+     ELEMTYPE data
+}T[N];
+
+
+
+
+### 1. 前提概念
+- **完全二叉树的顺序表存储规则**：
+  顺序表下标（设从`0`或`1`开始，通常用`1`更直观）与二叉树节点的对应关系：
+  - 若节点在顺序表中的下标为`i`，则其**左孩子下标为`2i`，右孩子下标为`2i+1`**；
+  - 若`2i > 顺序表长度`，则无左孩子；若`2i+1 > 顺序表长度`，则无右孩子。
+- **二叉链表节点定义**（需补充）：
+  ```c
+  typedef struct BiTNode {
+      int no;               // 对应顺序表的no字段
+      ELEMTYPE data;        // 对应顺序表的data字段
+      struct BiTNode *lchild, *rchild; // 左、右孩子指针
+  } BiTNode, *BiTree;
+  ```
+
+
+### 2. 算法设计（递归实现）
+利用完全二叉树的下标规则，递归构建每个节点的左、右子树：
+
+```c
+// 参数：顺序表T、当前节点在顺序表中的下标i（从1开始）
+BiTree CreateBiTree(struct tree T[], int i, int len) {
+    // 递归终止条件：下标超出顺序表长度，或节点无效（若顺序表存在空节点）
+    if (i > len) {
+        return NULL;
+    }
+    // 创建当前节点
+    BiTree node = (BiTree)malloc(sizeof(BiTNode));
+    node->no = T[i-1].no;   // 顺序表通常从0开始存储，故T[i-1]对应下标i的节点
+    node->data = T[i-1].data;
+    // 递归构建左孩子（左孩子下标为2i）
+    node->lchild = CreateBiTree(T, 2*i, len);
+    // 递归构建右孩子（右孩子下标为2i+1）
+    node->rchild = CreateBiTree(T, 2*i+1, len);
+    return node;
+}
+```
+
+
+### 3. 调用方式
+假设顺序表`T`的长度为`N`（即二叉树节点数），调用时传入`i=1`（根节点下标）：
+```c
+BiTree root = CreateBiTree(T, 1, N);
+```
+
 
 
