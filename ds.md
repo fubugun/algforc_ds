@@ -687,3 +687,241 @@ BiTree root = CreateBiTree(T, 1, N);
 
 如需我把两部分合并成一个统一风格的文档，也可以告诉我~
 
+-----
+## 题目1：有两个循环单链表，链表头指针分别为h1和h2，编写一个函数将链表h2链接到链表h1之后，要求链接后的链表仍保持循环链表形式。
+
+
+### 思路
+1. **循环单链表特性**：循环单链表的尾节点指针指向头节点（即尾节点的`next`等于头指针）。
+2. **核心操作**：
+   - 若h1为空，直接返回h2（h2本身已是循环链表）；若h2为空，直接返回h1。
+   - 找到h1的尾节点（满足`p1->next == h1`的节点p1）。
+   - 找到h2的尾节点（满足`p2->next == h2`的节点p2）。
+   - 链接操作：h1的尾节点指向h2的头节点（`p1->next = h2`），h2的尾节点指向h1的头节点（`p2->next = h1`），形成新的循环链表。
+3. **返回结果**：链接后的循环链表头指针仍为h1。
+
+
+### 代码
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+// 定义循环单链表节点结构
+typedef struct CNode {
+    int data;
+    struct CNode* next;
+} CNode;
+
+// 创建循环单链表（示例：从数组创建）
+CNode* createCircularList(int* arr, int n) {
+    if (n == 0) return NULL;
+    CNode* head = (CNode*)malloc(sizeof(CNode));
+    head->data = arr[0];
+    CNode* tail = head;
+    for (int i = 1; i < n; i++) {
+        CNode* newNode = (CNode*)malloc(sizeof(CNode));
+        newNode->data = arr[i];
+        tail->next = newNode;
+        tail = newNode;
+    }
+    tail->next = head; // 尾节点指向头节点，形成循环
+    return head;
+}
+
+// 打印循环单链表（打印前n个节点，避免无限循环）
+void printCircularList(CNode* head, int n) {
+    if (head == NULL) {
+        printf("链表为空\n");
+        return;
+    }
+    CNode* p = head;
+    for (int i = 0; i < n; i++) {
+        printf("%d ", p->data);
+        p = p->next;
+    }
+    printf("\n");
+}
+
+// 将h2链接到h1之后，返回新的循环链表头指针（h1）
+CNode* linkTwoCircularLists(CNode* h1, CNode* h2) {
+    // 边界情况：若h1为空，返回h2；若h2为空，返回h1
+    if (h1 == NULL) return h2;
+    if (h2 == NULL) return h1;
+
+    // 找到h1的尾节点（p1->next == h1）
+    CNode* p1 = h1;
+    while (p1->next != h1) {
+        p1 = p1->next;
+    }
+
+    // 找到h2的尾节点（p2->next == h2）
+    CNode* p2 = h2;
+    while (p2->next != h2) {
+        p2 = p2->next;
+    }
+
+    // 链接两个循环链表
+    p1->next = h2;   // h1的尾节点指向h2的头节点
+    p2->next = h1;   // h2的尾节点指向h1的头节点，形成新循环
+
+    return h1;
+}
+
+// 释放循环单链表内存
+void freeCircularList(CNode* head) {
+    if (head == NULL) return;
+    CNode* p = head->next;
+    while (p != head) {
+        CNode* temp = p;
+        p = p->next;
+        free(temp);
+    }
+    free(head);
+}
+
+int main() {
+    // 测试数据
+    int arr1[] = {1, 2, 3};
+    int arr2[] = {4, 5, 6};
+    CNode* h1 = createCircularList(arr1, 3);
+    CNode* h2 = createCircularList(arr2, 3);
+
+    printf("链接前h1（前3个节点）：");
+    printCircularList(h1, 3); // 1 2 3
+    printf("链接前h2（前3个节点）：");
+    printCircularList(h2, 3); // 4 5 6
+
+    CNode* newHead = linkTwoCircularLists(h1, h2);
+
+    printf("链接后（前6个节点）：");
+    printCircularList(newHead, 6); // 1 2 3 4 5 6
+
+    freeCircularList(newHead);
+    return 0;
+}
+```
+
+
+### 说明
+- **循环链表识别**：通过尾节点的`next`指向头节点的特性，准确定位h1和h2的尾节点。
+- **边界处理**：兼容h1或h2为空的情况，保证函数健壮性。
+- **链接逻辑**：通过两次指针调整（h1尾接h2头，h2尾接h1头），确保新链表仍是循环结构，头指针保持为h1。
+
+----
+## 题目2：在二叉树中查找给定值为x的结点，试编写算法找出值为x的结点并输出值为x的结点的所有祖先，假设值为x的结点仅有一个或不存在。
+
+
+### 思路
+1. **二叉树结构**：节点包含数据域、左孩子指针、右孩子指针。
+2. **核心逻辑**：
+   - 采用递归遍历（先序遍历思路），从根节点开始查找x。
+   - 若当前节点为x，返回“找到”的标志（通知父节点）。
+   - 若左子树中找到x，当前节点是祖先，输出当前节点数据。
+   - 若右子树中找到x，当前节点是祖先，输出当前节点数据。
+   - 若遍历结束未找到x，输出提示信息。
+3. **特殊情况**：若x是根节点，无祖先，直接提示；若树为空，直接提示。
+
+
+### 代码
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+// 定义二叉树节点结构
+typedef struct BiNode {
+    int data;
+    struct BiNode* left;
+    struct BiNode* right;
+} BiNode;
+
+// 创建二叉树节点
+BiNode* createBiNode(int data) {
+    BiNode* node = (BiNode*)malloc(sizeof(BiNode));
+    node->data = data;
+    node->left = NULL;
+    node->right = NULL;
+    return node;
+}
+
+// 递归查找x并输出其祖先（辅助函数）
+// 返回值：1表示找到x，0表示未找到
+int findXAndAncestors(BiNode* node, int x) {
+    if (node == NULL) return 0; // 空节点，未找到
+
+    // 若当前节点是x，返回找到标志
+    if (node->data == x) return 1;
+
+    // 查找左子树，若找到x，当前节点是祖先
+    if (findXAndAncestors(node->left, x)) {
+        printf("%d ", node->data);
+        return 1;
+    }
+
+    // 查找右子树，若找到x，当前节点是祖先
+    if (findXAndAncestors(node->right, x)) {
+        printf("%d ", node->data);
+        return 1;
+    }
+
+    return 0; // 左右子树均未找到
+}
+
+// 主函数：查找x并输出其所有祖先
+void findAncestors(BiNode* root, int x) {
+    if (root == NULL) {
+        printf("二叉树为空，无法查找\n");
+        return;
+    }
+
+    // 若x是根节点，无祖先
+    if (root->data == x) {
+        printf("值为%d的节点是根节点，没有祖先\n", x);
+        return;
+    }
+
+    // 调用辅助函数查找
+    int found = findXAndAncestors(root, x);
+    if (!found) {
+        printf("未找到值为%d的节点\n", x);
+    } else {
+        printf("是值为%d的节点的所有祖先\n", x);
+    }
+}
+
+// 释放二叉树内存
+void freeBiTree(BiNode* root) {
+    if (root == NULL) return;
+    freeBiTree(root->left);
+    freeBiTree(root->right);
+    free(root);
+}
+
+int main() {
+    // 构建示例二叉树：
+    //       1
+    //      / \
+    //     2   3
+    //    / \
+    //   4   5
+    BiNode* root = createBiNode(1);
+    root->left = createBiNode(2);
+    root->right = createBiNode(3);
+    root->left->left = createBiNode(4);
+    root->left->right = createBiNode(5);
+
+    // 测试查找
+    findAncestors(root, 5); // 输出：2 1 是值为5的节点的所有祖先
+    findAncestors(root, 1); // 输出：值为1的节点是根节点，没有祖先
+    findAncestors(root, 6); // 输出：未找到值为6的节点
+
+    freeBiTree(root);
+    return 0;
+}
+```
+
+
+### 说明
+- **递归逻辑**：通过递归遍历左、右子树，利用返回值传递“是否找到x”的信息，当子树找到x时，当前节点即为祖先并输出。
+- **祖先顺序**：输出顺序为“直接父节点→...→根节点”，符合祖先层级关系（根节点是最顶层祖先）。
+- **特殊处理**：单独判断x为根节点或树为空的情况，确保输出准确。
+
