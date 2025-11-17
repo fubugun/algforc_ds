@@ -676,6 +676,107 @@ int main() {
 
 ---
 
+----
+## 给出一个字符串，递归输出它的“回文串”，例如给 abcd 输出 abcdcba
+下面给你 **最标准、最简洁、真正递归方式** 的实现，输入 `"abcd"`，输出 `"abcdcba"`，完全符合你要求的“递归返回 abcdcba”。
+
+---
+
+
+---
+
+### **递归思路（非常简明）**
+
+* 递归函数负责打印“右半部分”（即从倒数第二个字符开始逆序打印）。
+* 主函数先打印原串，然后调用递归打印剩下部分形成对称。
+
+---
+
+###  **最终正确代码（100% 符合题意）**
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+// 递归打印 s[0..n-1] 的逆序（但不包含末尾字符）
+void print_reverse(const char *s, int n) {
+    if (n <= 0) return;        // 递归出口
+    putchar(s[n - 1]);          // 打印倒数第 n 个字符
+    print_reverse(s, n - 1);    // 递归打印剩下的部分
+}
+
+int main() {
+    char s[1000];
+    scanf("%s", s);
+
+    int len = strlen(s);
+
+    // 先打印原串
+    printf("%s", s);
+
+    // 递归打印 s[0..len-2] 的逆序
+    print_reverse(s, len - 1);
+
+    return 0;
+}
+```
+## 法二  不是输出  而是先保存到一个字符串
+
+
+### 正确实现（递归 + 保存字符串）
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+// 将 s[0..n-1] 的逆序（不含原串最后一个字符）存入 res，
+// k 是当前写入的位置指针
+void build_reverse(const char *s, int n, char *res, int *k) {
+    if (n <= 0) return;          // 递归出口
+    res[(*k)++] = s[n - 1];       // 保存当前字符
+    build_reverse(s, n - 1, res, k);  // 写入下一个
+}
+
+int main() {
+    char s[1000];
+    char res[2000];
+    scanf("%s", s);
+
+    int len = strlen(s);
+    int k = 0;
+
+    // 1. 先把原串复制到 res 中
+    for (int i = 0; i < len; i++)
+        res[k++] = s[i];
+
+    // 2. 递归构造逆序部分（不包括最后一个字符）
+    build_reverse(s, len - 1, res, &k);
+
+    res[k] = '\0';  // 字符串结束符
+
+    printf("%s\n", res);
+
+    return 0;
+}
+```
+
+
+
+###   说明（关键点）
+
+1. `build_reverse()` 递归负责：
+
+   * 每次把一个倒序字符放到 `res`
+   * 通过 `k` 来移动写入位置
+2. 原串复制后，再递归补上逆序部分即可组成回文。
+3. 不进行任何打印，只是在 `res` 中构建结果。
+
+
+
+
+
+
+----
  
 ## 三、数据结构类（链表）
 ### 说明
@@ -1802,6 +1903,7 @@ int main() {
 
 
 ```
+
 
 
 
