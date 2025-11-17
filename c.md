@@ -1,6 +1,4 @@
-用户：
-改一下排版  现在字体不统一 太乱了  按照四个章节  字符串 枚举递归  数据结构  数字 四个章节 每个章节🈶对应题目  给我改一下排版 文字内容不要改动
-豆包：
+
 # C语言算法题集
 ## 一、字符串操作类
 ### 题目1：字符串循环左移
@@ -1140,6 +1138,138 @@ int main() {
 ```
 
 
+
+
+
+## 写出完整程序，将不带头结点的单向链表结点数据域中的数据从小到大排序。 
+### 思路
+1. **链表结构**：定义不带头结点的单向链表，节点包含数据域（int类型）和指针域（指向后续节点）。
+2. **排序算法选择**：采用冒泡排序，适合链表的特点（通过相邻节点比较和数据交换实现排序）。
+3. **核心逻辑**：
+   - 若链表为空或只有一个节点，直接返回（无需排序）。
+   - 外层循环控制排序轮次，通过标志位判断是否已完成排序（无交换时提前结束）。
+   - 内层循环遍历链表，比较相邻节点数据，若前节点数据大于后节点，交换两者数据。
+4. **辅助函数**：创建链表（从用户输入构建链表）、打印链表（展示排序前后结果）、释放内存（避免泄漏）。
+
+
+### 代码
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+// 定义链表节点结构
+typedef struct Node {
+    int data;          // 数据域
+    struct Node* next; // 指针域，指向后一个节点
+} Node;
+
+// 创建不带头结点的单向链表（用户输入数据，-1结束）
+Node* createList() {
+    Node* head = NULL; // 头指针初始为空（不带头结点）
+    Node* tail = NULL; // 尾指针，用于高效插入
+    int data;
+
+    printf("请输入节点数据（输入-1结束）：");
+    scanf("%d", &data);
+
+    while (data != -1) {
+        // 创建新节点
+        Node* newNode = (Node*)malloc(sizeof(Node));
+        if (newNode == NULL) {
+            printf("内存分配失败！\n");
+            exit(1);
+        }
+        newNode->data = data;
+        newNode->next = NULL;
+
+        // 插入新节点（空链表时头指针指向第一个节点，否则尾插）
+        if (head == NULL) {
+            head = newNode;
+            tail = newNode;
+        } else {
+            tail->next = newNode;
+            tail = newNode;
+        }
+
+        printf("请输入节点数据（输入-1结束）：");
+        scanf("%d", &data);
+    }
+
+    return head;
+}
+
+// 打印链表数据
+void printList(Node* head) {
+    Node* p = head;
+    while (p != NULL) {
+        printf("%d ", p->data);
+        p = p->next;
+    }
+    printf("\n");
+}
+
+// 对链表数据进行从小到大排序（冒泡排序）
+void sortList(Node* head) {
+    // 空链表或只有一个节点，无需排序
+    if (head == NULL || head->next == NULL) {
+        return;
+    }
+
+    int swapped;       // 标志位：记录本轮是否发生交换
+    Node* current;     // 当前节点指针
+
+    do {
+        swapped = 0;
+        current = head;
+
+        // 遍历链表，比较相邻节点并交换数据
+        while (current->next != NULL) {
+            if (current->data > current->next->data) {
+                // 交换数据域的值
+                int temp = current->data;
+                current->data = current->next->data;
+                current->next->data = temp;
+                swapped = 1; // 标记发生交换
+            }
+            current = current->next; // 移动到下一个节点
+        }
+    } while (swapped); // 若本轮无交换，说明已排序完成
+}
+
+// 释放链表内存
+void freeList(Node* head) {
+    Node* temp;
+    while (head != NULL) {
+        temp = head;
+        head = head->next;
+        free(temp);
+    }
+}
+
+int main() {
+    Node* head = createList(); // 创建链表
+
+    printf("排序前的链表：");
+    printList(head);
+
+    sortList(head); // 排序
+
+    printf("排序后的链表：");
+    printList(head);
+
+    freeList(head); // 释放内存
+    return 0;
+}
+```
+
+
+### 说明
+- **不带头结点**：链表的头指针`head`直接指向第一个节点（若链表为空，`head`为`NULL`）。
+- **冒泡排序适配**：通过相邻节点的数据交换实现排序，避免了复杂的节点指针调整，适合单向链表的特性。
+- **健壮性**：处理了空链表和单节点链表的边界情况，通过标志位优化排序效率（提前结束无序循环）。
+- **使用流程**：用户输入数据创建链表→打印排序前链表→排序→打印排序后链表→释放内存，完整覆盖链表操作的生命周期。
+```
+
 ## 四、数学与进制转换类
 ### 说明
 - 判断是否是素数：到sqrt(m)；
@@ -1672,6 +1802,7 @@ int main() {
 
 
 ```
+
 
 
 
