@@ -1044,6 +1044,275 @@ int isSimilar(TreeNode *a, TreeNode *b) {
 
 ---
 
+### 1. **数列a、b存储在单链表中，判断b是否为a的子序列**
+***算法思路***：
+- 用指针`p`遍历a，`q`遍历b，若`p`与`q`的当前元素匹配，则`q`后移（继续匹配下一个元素）；无论是否匹配，`p`均后移。
+- 若`q`遍历结束（所有元素匹配），则b是a的子序列；否则不是。
+
+***关键代码***：
+```c
+bool isSubsequence(ListNode *a, ListNode *b) {
+    ListNode *p = a, *q = b;
+    while (p != NULL && q != NULL) {
+        if (p->data == q->data) {
+            q = q->next; // 匹配成功，b移至下一个元素
+        }
+        p = p->next; // a始终后移
+    }
+    return q == NULL; // 若b遍历完，说明是子序列
+}
+```
+
+---
+
+### 2. **在二叉排序树中删除节点值为n的节点，不考虑删除的是根节点**
+***算法思路***：
+- 先查找值为n的节点（记为`p`）及其父节点（记为`parent`）。
+- 分三种情况处理：
+  1. 若`p`是叶子节点：直接修改`parent`的左/右指针为`NULL`，释放`p`。
+  2. 若`p`只有左子树或右子树：用`p`的子树替代`p`的位置（修改`parent`的指针指向`p`的子树）。
+  3. 若`p`有左右子树：找`p`右子树中值最小的节点（或左子树中值最大的节点）替代`p`，删除该替代节点。
+
+***关键代码***：
+```c
+// 假设已找到待删节点p及其父节点parent，且p不是根节点
+void deleteNode(BSTNode *&root, BSTNode *parent, BSTNode *p) {
+    if (p->left == NULL && p->right == NULL) { // 叶子节点
+        if (parent->left == p) parent->left = NULL;
+        else parent->right = NULL;
+    } else if (p->left == NULL) { // 只有右子树
+        if (parent->left == p) parent->left = p->right;
+        else parent->right = p->right;
+    } else if (p->right == NULL) { // 只有左子树
+        if (parent->left == p) parent->left = p->left;
+        else parent->right = p->left;
+    } else { // 左右子树均存在，找右子树最小值节点
+        BSTNode *succ = p->right;
+        BSTNode *succParent = p;
+        while (succ->left != NULL) { // 最小值在右子树最左
+            succParent = succ;
+            succ = succ->left;
+        }
+        p->data = succ->data; // 用后继值替代p
+        // 删除后继节点（后继最多只有右子树）
+        if (succParent->left == succ) succParent->left = succ->right;
+        else succParent->right = succ->right;
+        p = succ; // 待释放节点改为后继
+    }
+    free(p);
+}
+```
+
+---
+
+### 3. **递归实现把一棵二叉树的左孩子和右孩子交换位置**
+***算法思路***：
+- 递归终止条件：若当前节点为空，直接返回。
+- 递归逻辑：先交换当前节点的左、右子树，再递归交换左子树和右子树。
+
+***关键代码***：
+```c
+void swapLeftRight(BTNode *root) {
+    if (root == NULL) return; // 空树直接返回
+    // 交换当前节点的左右子树
+    BTNode *temp = root->left;
+    root->left = root->right;
+    root->right = temp;
+    // 递归交换左子树和右子树
+    swapLeftRight(root->left);
+    swapLeftRight(root->right);
+}
+```
+
+---
+
+### 4. **使用破圈法构造最小生成树**
+***算法思路***：
+- 破圈法核心：初始包含所有节点和边，每次从图中找一个回路，删除回路中权值最大的边，重复操作直至图中无回路（只剩n-1条边，n为节点数）。
+- 步骤：
+  1. 初始化：将所有边按权值从大到小排序（便于优先删除大权重边）。
+  2. 遍历每条边，检查若删除该边后图仍连通（用并查集判断），则删除该边；否则保留。
+  3. 直至剩余边数为n-1，得到最小生成树。
+
+---
+
+### 5. **二维数组A[m][n]每行左到右递增，每列上到下递增，判断x是否存在并输出位置，要求时间复杂度O(m+n)**
+***算法思路***：
+- 从数组右上角（`A[0][n-1]`）开始比较：
+  - 若当前元素等于x，返回当前行列号；
+  - 若当前元素大于x，说明x在左侧，列号减1；
+  - 若当前元素小于x，说明x在下方，行号加1；
+- 若遍历至数组外仍未找到，说明x不存在。
+
+---
+
+### 6. **判断有向图G是否有根节点（根节点r到所有节点有路径），若有则打印所有根节点（图用邻接表存储）**
+***算法思路***：
+- 对每个节点`r`，执行广度优先搜索（BFS）或深度优先搜索（DFS），检查是否能访问所有节点。
+- 若某节点`r`的遍历结果包含所有节点，则`r`是根节点，加入结果集。
+
+***关键代码***：
+```c
+// 辅助函数：从r出发BFS，返回访问到的节点数
+int bfs(AdjList g, int r, int n) {
+    int visited[n] = {0};
+    queue<int> q;
+    q.push(r);
+    visited[r] = 1;
+    int count = 1;
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        for (ArcNode *p = g[u].firstarc; p; p = p->nextarc) {
+            int v = p->adjvex;
+            if (!visited[v]) {
+                visited[v] = 1;
+                count++;
+                q.push(v);
+            }
+        }
+    }
+    return count;
+}
+
+// 主函数：打印所有根节点
+void findRoots(AdjList g, int n) {
+    for (int r = 0; r < n; r++) {
+        if (bfs(g, r, n) == n) { // 能访问所有节点
+            printf("%d ", r);
+        }
+    }
+}
+```
+
+---
+
+### 7. **顺序表L（下标从1开始），将所有小于表头元素的整数放前半部分，大于的放后半部分**
+***算法思路***：
+- 以表头元素`pivot = L[1]`为基准，用双指针`i=2`（从左向右找大于pivot的元素）和`j=L.length`（从右向左找小于pivot的元素），交换找到的元素，直至`i > j`。
+
+***关键代码***：
+```c
+void partition(SqList &L) {
+    if (L.length <= 1) return; // 长度<=1无需处理
+    int pivot = L.data[1]; // 表头元素为基准
+    int i = 2, j = L.length; // 双指针
+    while (i < j) {
+        // 从左找大于pivot的元素
+        while (i < j && L.data[i] <= pivot) i++;
+        // 从右找小于pivot的元素
+        while (i < j && L.data[j] >= pivot) j--;
+        // 交换找到的元素
+        if (i < j) {
+            int temp = L.data[i];
+            L.data[i] = L.data[j];
+            L.data[j] = temp;
+        }
+    }
+    // 最终i=j，将基准放到中间位置（可选，题目未要求基准位置）
+}
+```
+
+---
+
+### 8. **二叉树用二叉链表存储，求值为x的节点的层号（根节点为1层）**
+***算法思路***：
+- 采用层次遍历（BFS），记录当前节点的层号，若找到值为x的节点，返回其层号；遍历结束未找到则返回-1。
+
+***关键代码***：
+```c
+int getLevel(BTNode *b, int x) {
+    if (b == NULL) return -1; // 空树
+    queue<pair<BTNode*, int>> q; // 存储节点和层号
+    q.push({b, 1}); // 根节点层号为1
+    while (!q.empty()) {
+        auto [node, level] = q.front(); q.pop();
+        if (node->data == x) return level; // 找到目标节点
+        if (node->left) q.push({node->left, level + 1});
+        if (node->right) q.push({node->right, level + 1});
+    }
+    return -1; // 未找到
+}
+```
+
+---
+
+### 9. **设计循环队列（结构含`front`、`rear`、`tag`），实现初始化、入队、出队算法**
+***结构定义***：
+```c
+typedef struct {
+    ElmType data[MAXQSIZE];
+    int front; // 队头指针
+    int rear;  // 队尾指针（指向队尾元素的下一个位置）
+    int tag;   // 0为空，1为不空
+} Queue;
+```
+
+***算法思路***：
+- 初始化：`front = rear = 0`，`tag = 0`（队空）。
+- 入队：若队列满（`front == rear && tag == 1`）则报错；否则存入数据，`rear = (rear + 1) % MAXQSIZE`，`tag = 1`（标记为不空）。
+- 出队：若队空（`tag == 0`）则报错；否则取出队头元素，`front = (front + 1) % MAXQSIZE`，若`front == rear`则`tag = 0`（标记为空）。
+
+***关键代码***：
+```c
+// 初始化
+void InitQueue(Queue &q) {
+    q.front = q.rear = 0;
+    q.tag = 0;
+}
+
+// 入队
+bool EnQueue(Queue &q, ElmType x) {
+    if (q.front == q.rear && q.tag == 1) return false; // 队满
+    q.data[q.rear] = x;
+    q.rear = (q.rear + 1) % MAXQSIZE;
+    q.tag = 1; // 标记为不空
+    return true;
+}
+
+// 出队
+bool DeQueue(Queue &q, ElmType &x) {
+    if (q.tag == 0) return false; // 队空
+    x = q.data[q.front];
+    q.front = (q.front + 1) % MAXQSIZE;
+    if (q.front == q.rear) q.tag = 0; // 队空
+    return true;
+}
+```
+
+---
+
+### 10. **二叉树用二叉链表存储，求每个节点的平衡因子（左子树高度 - 右子树高度）**
+***算法思路***：
+- 递归计算每个节点的左、右子树高度，平衡因子 = 左高 - 右高。
+- 用后序遍历（先算子树高度，再算当前节点平衡因子）。
+
+***关键代码***：
+```c
+// 辅助函数：计算树的高度
+int getHeight(BTNode *node) {
+    if (node == NULL) return 0;
+    int leftH = getHeight(node->left);   // 左子树高度
+    int rightH = getHeight(node->right); // 右子树高度
+    return (leftH > rightH ? leftH : rightH) + 1;
+}
+
+// 计算并输出每个节点的平衡因子
+void getBalanceFactors(BTNode *root) {
+    if (root == NULL) return;
+    // 后序遍历：先处理左右子树
+    getBalanceFactors(root->left);
+    getBalanceFactors(root->right);
+    // 计算当前节点平衡因子
+    int leftH = getHeight(root->left);
+    int rightH = getHeight(root->right);
+    root->balance = leftH - rightH; // 假设节点有balance成员
+    printf("节点%d的平衡因子：%d\n", root->data, root->balance);
+}
+```
+
+---
+
+要不要我帮你整理一份**算法题考点汇总表**，包含每道题的核心考点、时间复杂度和易错点，方便你复习？
 
 
 
