@@ -1312,7 +1312,23 @@ void getBalanceFactors(BTNode *root) {
 
 ---
 
-要不要我帮你整理一份**算法题考点汇总表**，包含每道题的核心考点、时间复杂度和易错点，方便你复习？
+## 题目六 2（二叉树祖先题）
+题目：在二叉树中查找值为 m 的结点，试设计一个算法输出值为 m 的结点的所有祖先，假设值为 m 的结点不多于一个。函数原型: search (BTree *t, int m);
+算法思路：用递归遍历，找到目标结点后回溯输出路径上的结点。算法代码：
+```c
+运行
+// 返回值：是否找到目标结点
+int search(BTree *t, int m) {
+    if (t == NULL) return 0;
+    if (t->data == m) return 1;
+    // 递归查找左/右子树
+    if (search(t->lchild, m) || search(t->rchild, m)) {
+        printf("%d ", t->data); // 找到后输出当前结点（祖先）
+        return 1;
+    }
+    return 0;
+}
+```
 
 
 
