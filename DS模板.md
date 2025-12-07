@@ -132,7 +132,7 @@ void insertSort(int a[], int n) {
     }
 }
  
- ```c
+```
 ### 2. 折半插入排序（Binary Insertion Sort）代码
  
  ```c
@@ -161,7 +161,7 @@ void binaryInsertSort(int a[], int n) {
     }
 }
  
- ```c
+```
 
 ### 三、二叉树遍历
 #### （1）递归遍历
