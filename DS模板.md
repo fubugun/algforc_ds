@@ -113,9 +113,9 @@ void quickSort(int arr[], int low, int high) {
     }
 }
 ```
-1. 直接插入排序（Insertion Sort）代码
+### 1. 直接插入排序（Insertion Sort）代码
  
-c  
+ ```c
 void insertSort(int a[], int n) {
     int i, j, temp;
     // 第一个元素已经有序，从第二个元素开始插入有序部分
@@ -132,10 +132,10 @@ void insertSort(int a[], int n) {
     }
 }
  
+ ```c
+### 2. 折半插入排序（Binary Insertion Sort）代码
  
-2. 折半插入排序（Binary Insertion Sort）代码
- 
-c  
+ ```c
 void binaryInsertSort(int a[], int n) {
     int i, j, low, high, mid;
     int temp; // 用来暂存待插入元素
@@ -161,7 +161,7 @@ void binaryInsertSort(int a[], int n) {
     }
 }
  
- 
+ ```c
 
 ### 三、二叉树遍历
 #### （1）递归遍历
