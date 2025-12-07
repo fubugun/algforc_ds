@@ -113,7 +113,55 @@ void quickSort(int arr[], int low, int high) {
     }
 }
 ```
-
+1. 直接插入排序（Insertion Sort）代码
+ 
+c  
+void insertSort(int a[], int n) {
+    int i, j, temp;
+    // 第一个元素已经有序，从第二个元素开始插入有序部分
+    for (i = 1; i < n; i++) {
+        // 若比有序部分的最后一个元素还大，则没必要调整
+        if (a[i] < a[i-1]) {
+            temp = a[i]; // 挖个坑，用 temp 保存被挖出来的 a[i]
+            // 边比较边向后移动
+            for (j = i-1; j >= 0 && a[j] > temp; j--) {
+                a[j+1] = a[j];
+            }
+            a[j+1] = temp; // 填上坑
+        }
+    }
+}
+ 
+ 
+2. 折半插入排序（Binary Insertion Sort）代码
+ 
+c  
+void binaryInsertSort(int a[], int n) {
+    int i, j, low, high, mid;
+    int temp; // 用来暂存待插入元素
+    // 第一个元素已经有序，从第二个元素开始插入有序部分
+    for (i = 1; i < n; i++) {
+        temp = a[i];
+        low = 0;
+        high = i-1;
+        // 二分查找插入位置
+        while (low <= high) {
+            mid = (low + high) / 2;
+            if (a[mid] > temp) { // 若中间元素比 temp 大，则插入左半表
+                high = mid - 1;
+            } else { // 否则插入右半表
+                low = mid + 1;
+            }
+        }
+        // low 为目标插入位置，将插入位置及后面的元素后移
+        for (j = i-1; j >= low; j--) {
+            a[j+1] = a[j];
+        }
+        a[low] = temp; // 插入待排序元素
+    }
+}
+ 
+ 
 
 ### 三、二叉树遍历
 #### （1）递归遍历
